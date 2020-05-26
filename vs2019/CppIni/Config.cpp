@@ -1,9 +1,16 @@
 #include "Config.h"
 #include <fstream>
-#include <stdlib.h>
 
 namespace ini
 {
+    Config::Config()
+    {
+    }
+
+    Config::~Config()
+    {
+        m_settings.clear();
+    }
 
     bool Config::IsSpaceTab(char c)
     {
@@ -14,7 +21,7 @@ namespace ini
         return false;
     }
 
-    bool Config::IsCommentChar(char c)
+    bool Config::IsComment(char c)
     {
         switch (c)
         {
@@ -25,7 +32,7 @@ namespace ini
         }
     }
 
-    void Config::TrimSpaceTab(std::string& str)
+    void Config::Trim(std::string& str)
     {
         // 判断是否为空
         if (str.empty())
@@ -34,7 +41,7 @@ namespace ini
         }
 
         // 从左到右判断，如果都是空格，则返回空字符串
-        int i, nStartPos, nEndPos;
+        size_t i, nStartPos, nEndPos;
         for (i = 0; i < str.size(); ++i)
         {
             if (!IsSpaceTab(str[i]))
@@ -62,91 +69,105 @@ namespace ini
         str = str.substr(nStartPos, nEndPos - nStartPos + 1);
     }
 
-    //void Config::ReplaceSpaceTab(std::string& str)
-    //{
-    //    str = str.replace(str.begin(), str.end(), )
-
-    //}
-
-    bool Config::AnalyseLine(const std::string& strLine, std::string& strSection, std::string& strKey, std::string& strValue)
+    bool Config::ExtractConfig(const std::string& strLine, std::string& strSection, std::string& strKey, std::string& strValue)
     {
+        // 安全检查
         if (strLine.empty())
         {
             return false;
         }
 
-        int nStartPos = 0, nEndPos = strLine.size() - 1, nPos, nStartPosOfBracket, nEndPosOfBracket;
+        size_t nPos;                         // 移动的位置
+        size_t nStartPos = 0;                // 起始位置
+        size_t nEndPos = strLine.size() - 1; // 结束位置
+        size_t nStartPosOfBracket;           // 括号开始的位置
+        size_t nEndPosOfBracket;             // 括号结束的位置
 
         // 行中包含#
         if ((nPos = strLine.find("#")) != std::string::npos)
         {
-            // 第一个字符是#
+            // 第一个字符是#，则整行都是注释
             if (0 == nPos)
             {
                 return false;
             }
+            // #不是首字符
             nEndPos = nPos - 1;
         }
 
+        // 提取出section
         if (((nStartPosOfBracket = strLine.find("[")) != std::string::npos) && ((nEndPosOfBracket = strLine.find("]"))) != std::string::npos)
         {
             strSection = strLine.substr(nStartPosOfBracket + 1, nEndPosOfBracket - 1);
             return true;
         }
 
+        // 提取出去掉#注释的key=value
         std::string strNewLine = strLine.substr(nStartPos, nStartPos + 1 - nEndPos);
-        if ((nPos = strNewLine.find('=')) == -1)
+        // 没找到等号
+        if ((nPos = strNewLine.find('=')) == std::string::npos)
         {
             return false;
         }
 
         strKey = strNewLine.substr(0, nPos);
         strValue = strNewLine.substr(nPos + 1, nEndPos + 1 - (nPos + 1));
-        TrimSpaceTab(strKey);
+        Trim(strKey);
         if (strKey.empty()) 
         {
             return false;
         }
 
-        TrimSpaceTab(strValue);
-        if ((nPos = strValue.find("\r")) > 0)
+        Trim(strValue);
+        if (nPos = strValue.find("\r") != std::string::npos)
         {
-            strValue.replace(nPos, 1, "");
+            if ((nPos = strValue.find("\r")) > 0)
+            {
+                strValue.replace(nPos, 1, "");
+            }
         }
 
-        if ((nPos = strValue.find("\n")) > 0)
+        if (nPos = strValue.find("\n") != std::string::npos)
         {
-            strValue.replace(nPos, 1, "");
+            if ((nPos = strValue.find("\n")) > 0)
+            {
+                strValue.replace(nPos, 1, "");
+            }
         }
 
         return true;
     }
 
+
     bool Config::ReadConfig(const std::string& strFilename)
     {
+        // 清空设置
         m_settings.clear();
+
+        // 读取文件
         std::ifstream inFile(strFilename.c_str());
         if (!inFile)
         {
             return false;
         }
-        std::string strLine, strKey, strValue, strSection;
-        std::map<std::string, std::string> k_v;
+
+        std::string strLine, strSection, strKey, strValue;
+        std::map<std::string, std::string> mapKeyValue;
         std::map<std::string, std::map<std::string, std::string> >::iterator iter;
         while (getline(inFile, strLine))
         {
-            if (AnalyseLine(strLine, strSection, strKey, strValue))
+            if (ExtractConfig(strLine, strSection, strKey, strValue))
             {
                 iter = m_settings.find(strSection);
                 if (iter != m_settings.end())
                 {
-                    k_v[strKey] = strValue;
-                    iter->second = k_v;
+                    mapKeyValue[strKey] = strValue;
+                    iter->second = mapKeyValue;
                 }
                 else
                 {
-                    k_v.clear();
-                    m_settings.insert(std::make_pair(strSection, k_v));
+                    mapKeyValue.clear();
+                    m_settings.insert(std::make_pair(strSection, mapKeyValue));
                 }
             }
             strKey.clear();
@@ -156,68 +177,80 @@ namespace ini
         return true;
     }
 
-    std::string Config::ReadString(const char* section, const char* item, const char* default_value)
+    std::string Config::GetString(const char* szSection, const char* szKey, const char* szDefaultValue)
     {
-        std::string tmp_s(section);
-        std::string tmp_i(item);
-        std::string def(default_value);
-        std::map<std::string, std::string> k_v;
-        std::map<std::string, std::string>::iterator it_item;
-        std::map<std::string, std::map<std::string, std::string> >::iterator it;
-        it = m_settings.find(tmp_s);
-        if (it == m_settings.end())
+        std::string strSection(szSection);
+        std::string strKey(szKey);
+        std::string strDefaultValue(szDefaultValue);
+        std::map<std::string, std::string> mapKeyValue;
+        std::map<std::string, std::string>::iterator mapIter;
+        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+
+        // 寻找section
+        iter = m_settings.find(strSection);
+        if (iter == m_settings.end())
         {
-            return def;
+            return strDefaultValue;
         }
-        k_v = it->second;
-        it_item = k_v.find(tmp_i);
-        if (it_item == k_v.end())
+        mapKeyValue = iter->second;
+
+        // 寻找key
+        mapIter = mapKeyValue.find(strKey);
+        if (mapIter == mapKeyValue.end())
         {
-            return def;
+            return strDefaultValue;
         }
-        return it_item->second;
+
+        return mapIter->second;
     }
 
-    int Config::ReadInt(const char* section, const char* item, const int& default_value)
+    int Config::GetInt(const char* szSection, const char* szKey, const int& szDefaultValue)
     {
-        std::string strSection(section);
-        std::string strItem(item);
-        std::map<std::string, std::string> k_v;
-        std::map<std::string, std::string>::iterator it_item;
-        std::map<std::string, std::map<std::string, std::string> >::iterator it;
-        it = m_settings.find(strSection);
-        if (it == m_settings.end())
+        std::string strSection(szSection);
+        std::string strKey(szKey);
+        std::map<std::string, std::string> mapKeyValue;
+        std::map<std::string, std::string>::iterator mapIter;
+        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+
+        // 寻找section
+        iter = m_settings.find(strSection);
+        if (iter == m_settings.end())
         {
-            return default_value;
+            return szDefaultValue;
         }
-        k_v = it->second;
-        it_item = k_v.find(strItem);
-        if (it_item == k_v.end())
+        mapKeyValue = iter->second;
+
+        // 寻找key
+        mapIter = mapKeyValue.find(strKey);
+        if (mapIter == mapKeyValue.end())
         {
-            return default_value;
+            return szDefaultValue;
         }
-        return atoi(it_item->second.c_str());
+        return atoi(mapIter->second.c_str());
     }
 
-    float Config::ReadFloat(const char* section, const char* item, const float& default_value)
+    double Config::GetDouble(const char* szSection, const char* szKey, const double& szDefaultValue)
     {
-        std::string strSection(section);
-        std::string strItem(item);
-        std::map<std::string, std::string> k_v;
-        std::map<std::string, std::string>::iterator it_item;
-        std::map<std::string, std::map<std::string, std::string> >::iterator it;
-        it = m_settings.find(strSection);
-        if (it == m_settings.end())
+        std::string strSection(szSection);
+        std::string strKey(szKey);
+        std::map<std::string, std::string> strKeyValue;
+        std::map<std::string, std::string>::iterator mapIter;
+        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+
+        // 寻找section
+        iter = m_settings.find(strSection);
+        if (iter == m_settings.end())
         {
-            return default_value;
+            return szDefaultValue;
         }
-        k_v = it->second;
-        it_item = k_v.find(strItem);
-        if (it_item == k_v.end())
+        strKeyValue = iter->second;
+
+        // 寻找key
+        mapIter = strKeyValue.find(strKey);
+        if (mapIter == strKeyValue.end())
         {
-            return default_value;
+            return szDefaultValue;
         }
-        return atof(it_item->second.c_str());
+        return atof(mapIter->second.c_str());
     }
 }
-
