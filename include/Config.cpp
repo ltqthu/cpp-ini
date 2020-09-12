@@ -25,14 +25,14 @@ namespace ini
     {
         switch (c)
         {
-            case '#':
-                return true;
-            default:
-                return false;
+        case '#':
+            return true;
+        default:
+            return false;
         }
     }
 
-    void Config::Trim(std::string& str)
+    void Config::Trim(std::string &str)
     {
         // 判断是否为空
         if (str.empty())
@@ -69,7 +69,7 @@ namespace ini
         str = str.substr(nStartPos, nEndPos - nStartPos + 1);
     }
 
-    bool Config::ExtractConfig(const std::string& strLine, std::string& strSection, std::string& strKey, std::string& strValue)
+    bool Config::ExtractConfig(const std::string &strLine, std::string &strSection, std::string &strKey, std::string &strValue)
     {
         // 安全检查
         if (strLine.empty())
@@ -138,8 +138,7 @@ namespace ini
         return true;
     }
 
-
-    bool Config::ReadConfig(const std::string& strFilename)
+    bool Config::ReadConfig(const std::string &strFilename)
     {
         // 清空设置
         m_settings.clear();
@@ -153,7 +152,7 @@ namespace ini
 
         std::string strLine, strSection, strKey, strValue;
         std::map<std::string, std::string> mapKeyValue;
-        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+        std::map<std::string, std::map<std::string, std::string>>::iterator iter;
         while (getline(inFile, strLine))
         {
             if (ExtractConfig(strLine, strSection, strKey, strValue))
@@ -177,14 +176,14 @@ namespace ini
         return true;
     }
 
-    std::string Config::GetString(const char* szSection, const char* szKey, const char* szDefaultValue)
+    std::string Config::GetString(const char *szSection, const char *szKey, const char *szDefaultValue)
     {
         std::string strSection(szSection);
         std::string strKey(szKey);
         std::string strDefaultValue(szDefaultValue);
         std::map<std::string, std::string> mapKeyValue;
         std::map<std::string, std::string>::iterator mapIter;
-        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+        std::map<std::string, std::map<std::string, std::string>>::iterator iter;
 
         // 寻找section
         iter = m_settings.find(strSection);
@@ -204,13 +203,13 @@ namespace ini
         return mapIter->second;
     }
 
-    int Config::GetInt(const char* szSection, const char* szKey, const int& szDefaultValue)
+    int Config::GetInt(const char *szSection, const char *szKey, const int &szDefaultValue)
     {
         std::string strSection(szSection);
         std::string strKey(szKey);
         std::map<std::string, std::string> mapKeyValue;
         std::map<std::string, std::string>::iterator mapIter;
-        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+        std::map<std::string, std::map<std::string, std::string>>::iterator iter;
 
         // 寻找section
         iter = m_settings.find(strSection);
@@ -229,13 +228,13 @@ namespace ini
         return atoi(mapIter->second.c_str());
     }
 
-    double Config::GetDouble(const char* szSection, const char* szKey, const double& szDefaultValue)
+    double Config::GetDouble(const char *szSection, const char *szKey, const double &szDefaultValue)
     {
         std::string strSection(szSection);
         std::string strKey(szKey);
         std::map<std::string, std::string> strKeyValue;
         std::map<std::string, std::string>::iterator mapIter;
-        std::map<std::string, std::map<std::string, std::string> >::iterator iter;
+        std::map<std::string, std::map<std::string, std::string>>::iterator iter;
 
         // 寻找section
         iter = m_settings.find(strSection);
@@ -253,4 +252,4 @@ namespace ini
         }
         return atof(mapIter->second.c_str());
     }
-}
+} // namespace ini
