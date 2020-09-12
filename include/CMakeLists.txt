@@ -1,1 +1,3 @@
-add_library(Config Config.cpp)
+add_library(Ini Ini.cpp Tool.cpp)
+
+

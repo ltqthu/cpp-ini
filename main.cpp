@@ -1,26 +1,27 @@
 #include <iostream>
 
-#include "include/Config.h"
+#include "include/Ini.h"
 
-int main()
-{
-    ini::Config config;
-    config.ReadConfig("Config.ini");
+int main() {
+    std::string ip = Ini::Instance()->GetString("Netsetting", "IP", "");
 
-    std::string strIP = config.GetString("Netsetting", "IP", "");
-    std::string strPort = config.GetString("Netsetting", "Port", "");
-    std::cout << "IP=" << strIP << std::endl;
-    std::cout << "Port=" << strPort << std::endl;
+    printf("%s:%d [Netsetting] IP: %s\n", __FILE__, __LINE__, ip.c_str());
 
-    std::string HostName = config.GetString("MySQL", "Hostname", "");
-    int Port = config.GetInt("MySQL", "Port", 0);
-    std::string UserName = config.GetString("MySQL", "Username", "");
-    std::string Password = config.GetString("MySQL", "Password", "");
+    int port = Ini::Instance()->GetInt("Netsetting", "Port", 0);
+    printf("%s:%d [Netsetting] Port: %d\n", __FILE__, __LINE__, port);
 
-    std::cout << "HostName=" << HostName << std::endl;
-    std::cout << "Port=" << Port << std::endl;
-    std::cout << "UserName=" << UserName << std::endl;
-    std::cout << "Password=" << Password << std::endl;
+    std::string mysql_ip = Ini::Instance()->GetString("MySQL", "IP", "");
+
+    printf("%s:%d [MySQL] IP: %s\n", __FILE__, __LINE__, mysql_ip.c_str());
+
+    int mysql_port = Ini::Instance()->GetInt("MySQL", "Port", 0);
+    printf("%s:%d [MySQL] Port: %d\n", __FILE__, __LINE__, mysql_port);
+
+    std::string mysql_username = Ini::Instance()->GetString("MySQL", "Username", "");
+    printf("%s:%d [MySQL] Username: %s\n", __FILE__, __LINE__, mysql_username.c_str());
+
+    std::string mysql_password = Ini::Instance()->GetString("MySQL", "Password", "");
+    printf("%s:%d [MySQL] Password: %s\n", __FILE__, __LINE__, mysql_password.c_str());
 
     return 0;
 }

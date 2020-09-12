@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-project(ini)
+
+set(PROJECT_NAME main)
+project(${PROJECT_NAME})
 
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
@@ -16,6 +18,6 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 
 add_subdirectory(include)                # 添加 add子目录
 aux_source_directory(. DIR_SRCS)
-add_executable(ini ${DIR_SRCS})  #制定生成目标
-target_link_libraries(ini Config)  #添加链接库
+add_executable(${PROJECT_NAME} ${DIR_SRCS})  #制定生成目标
+target_link_libraries(${PROJECT_NAME} Ini)  #添加链接库
 
