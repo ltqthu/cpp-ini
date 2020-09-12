@@ -23,7 +23,6 @@
                 }
             ],
             "preLaunchTask": "cmake",
-            // "postDebugTask": "clean",
         }
     ]
 }

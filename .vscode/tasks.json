@@ -23,26 +23,9 @@
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared",
-                // "clear": true,
+                "clear": true,
                 "showReuseMessage": false
-            },
-        },
-        // {
-        //     "label": "clean",
-        //     "type": "shell",
-        //     "command": "rm",
-        //     "args": [
-        //         "-rf",
-        //         "*"
-        //     ],
-        //     "presentation": {
-        //         "echo": false,
-        //         "reveal": "always",
-        //         "focus": false,
-        //         "panel": "shared",
-        //         "clear": true,
-        //         "showReuseMessage": false
-        //     },
-        // }
+            }
+        }
     ]
 }
