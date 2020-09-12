@@ -1,10 +1,10 @@
 #include <iostream>
-#include "Config.h"
+#include "include/Config.h"
 
 int main()
 {
     ini::Config config;
-    config.ReadConfig("config.ini");
+    config.ReadConfig("Config.ini");
 
     std::string strIP = config.GetString("Netsetting", "IP", "");
     std::string strPort = config.GetString("Netsetting", "Port", "");
@@ -21,6 +21,5 @@ int main()
     std::cout << "UserName=" << UserName << std::endl;
     std::cout << "Password=" << Password << std::endl;
 
-    getchar();
     return 0;
 }

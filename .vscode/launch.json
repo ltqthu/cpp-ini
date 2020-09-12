@@ -13,7 +13,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -22,7 +22,8 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "make"
+            "preLaunchTask": "cmake",
+            // "postDebugTask": "clean",
         }
     ]
 }

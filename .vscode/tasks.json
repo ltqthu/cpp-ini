@@ -9,21 +9,40 @@
             "type": "shell",
             "command": "cmake",
             "args": [
-                "-G",
-                "Unix Makefiles",
                 "-DCMAKE_BUILD_TYPE=Debug",
-                ".."
-            ]
-        },
-        {
-            "label": "make",
-            "group": {
-                "kind": "build",
-                "isDefault": true
+                "..",
+                "&&",
+                "make",
+                "&&",
+                "rm",
+                "-rf",
+                "*"
+            ],
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                // "clear": true,
+                "showReuseMessage": false
             },
-            "type": "shell",
-            "command": "make",
-            "args": []
-        }
+        },
+        // {
+        //     "label": "clean",
+        //     "type": "shell",
+        //     "command": "rm",
+        //     "args": [
+        //         "-rf",
+        //         "*"
+        //     ],
+        //     "presentation": {
+        //         "echo": false,
+        //         "reveal": "always",
+        //         "focus": false,
+        //         "panel": "shared",
+        //         "clear": true,
+        //         "showReuseMessage": false
+        //     },
+        // }
     ]
 }
